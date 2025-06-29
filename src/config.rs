@@ -7,6 +7,8 @@ pub struct Config {
     pub trade_amount: f64,
     pub interval_secs: u64,
     pub live_mode: bool,
+    pub stop_loss_pct: f64,     // e.g., 0.02 for 2%
+    pub take_profit_pct: f64,   // e.g., 0.04 for 4%
 }
 
 impl Config {
@@ -32,12 +34,17 @@ impl Config {
             });
 
         let live_mode = env::var("LIVE_MODE").unwrap_or_else(|_| "false".into()) == "true";
+        let stop_loss_pct = env::var("STOP_LOSS_PCT").unwrap_or("0.02".into()).parse().unwrap();
+        let take_profit_pct = env::var("TAKE_PROFIT_PCT").unwrap_or("0.04".into()).parse().unwrap();
 
         Self {
             trading_pair,
             trade_amount,
             interval_secs,
             live_mode,
+            stop_loss_pct,
+            take_profit_pct
+
         }
     }
 }

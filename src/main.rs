@@ -7,6 +7,7 @@ mod backtest;
 mod config;
 mod state;
 mod fetch_candles;
+mod risk;
 
 use crate::binance::{fetch_klines, place_market_order};
 use crate::strategy::generate_signal;
@@ -16,6 +17,7 @@ use tokio::time::{sleep, Duration};
 use crate::{config::*, state::*};
 use reqwest::Client;
 use dotenv::dotenv;
+use crate::risk::check_stop_loss_take_profit;
 //use fetch_candles::fetch_binance_klines;
 
 #[tokio::main]
@@ -44,6 +46,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
         };
+
+        if let Some(&latest_price) = prices.last() {
+            if check_stop_loss_take_profit(latest_price, &mut position, &settings).await {
+                continue;
+            }
+        }
 
         // Generate signal
         let signal = generate_signal(&prices);
@@ -87,11 +95,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // Print current balance
-       /*  println!(
-            "💰 USD: ${:.2}, BTC: {:.6}",
-            position.quote_balance,
-            position.base_balance
-        ); */
+       
         let trade_pair = std::env::var("TRADE_PAIR").unwrap_or_else(|_| "BTCUSDT".to_string());
         let (base, quote) = parse_trade_pair(&trade_pair);
 
@@ -126,6 +130,6 @@ fn parse_trade_pair(pair: &str) -> (String, String) {
 fn known_quote_assets() -> Vec<&'static str> {
     vec![
         "USDT", "USDC", "BUSD", "USD", "BTC", "ETH", "BNB", "TRY", "EUR", "TUSD",
-        "FDUSD", "DAI", "AUD", "GBP", "RUB", "BRL", "NGN", "IDR", "PHP", "ARS", "ZAR"
+        "FDUSD", "DAI", "AUD", "GBP", "RUB", "BRL", "NGN", "IDR", "PHP", "ARS", "ZAR", "JPY", "SOL"
     ]
 }
