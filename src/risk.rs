@@ -1,6 +1,5 @@
 // src/risk.rs
 use crate::{config::Config, state::Position};
-use std::time::Duration;
 
 pub async fn check_stop_loss_take_profit(
     price: f64,

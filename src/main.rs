@@ -8,11 +8,15 @@ mod config;
 mod state;
 mod fetch_candles;
 mod risk;
+mod forex;
+mod utils;
 
 use crate::binance::{fetch_klines, place_market_order};
 use crate::strategy::generate_signal;
 use crate::alert::send_alert;
 use tokio::time::{sleep, Duration};
+use crate::forex::fetch_forex_klines;
+use crate::utils::is_forex_pair;
 
 use crate::{config::*, state::*};
 use reqwest::Client;
@@ -38,7 +42,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         // Fetch latest prices
       
-        let prices = match fetch_klines(&client, &settings.trading_pair).await {
+        let prices = match if is_forex_pair(&settings.trading_pair) {
+            fetch_forex_klines(&client, &settings.trading_pair).await
+        } else {
+            fetch_klines(&client, &settings.trading_pair).await
+        } {
             Ok(p) => p,
             Err(e) => {
                 eprintln!("❌ Failed to fetch prices: {}", e);
