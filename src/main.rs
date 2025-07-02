@@ -29,8 +29,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     let client = Client::new();
 
-    let mut position = Position::new();
     let settings = Config::load();
+    let mut position = Position::new(&settings);
 
     // Uncomment this for backtesting
   /*   let prices = fetch_binance_klines("BTCUSDT", "1h", 5000).await?;
@@ -56,6 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
 
         if let Some(&latest_price) = prices.last() {
+            println!("📈 Latest price: {:.2}", latest_price);
             if check_stop_loss_take_profit(latest_price, &mut position, &settings).await {
                 continue;
             }
@@ -63,15 +64,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Generate signal
         let signal = generate_signal(&prices);
+        
         println!("📡 Signal: {}", signal);
 
         // Handle signal
         match signal.as_ref() {
             "BUY" => {
                 if position.has_btc {
-                    println!("⚠️ Already holding BTC, skipping BUY.");
+                    println!("⚠️ Already holding asset, skipping BUY.");
                 } else {
                     let price = *prices.last().unwrap();
+                    println!("📥 Executing BUY at {:.2}", price);
                     position.buy(&price, &settings);
 
                     if settings.live_mode {
@@ -85,6 +88,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "SELL" => {
                 if position.has_btc {
                     let price = *prices.last().unwrap();
+                    println!("📤 Executing SELL at {:.2}", price);
                     position.sell(&price, &settings);
 
                     if settings.live_mode {

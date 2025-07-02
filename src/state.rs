@@ -6,14 +6,16 @@ pub struct Position {
     pub quote_balance: f64,
     pub base_balance: f64,
     pub has_btc: bool,
+    pub last_buy_price: Option<f64>,
 }
 
 impl Position {
-    pub fn new() -> Self {
+    pub fn new(config: &Config) -> Self {
         Self {
-            quote_balance: 1000.0,
+            quote_balance: config.start_balance,
             base_balance: 0.0,
             has_btc: false,
+            last_buy_price: None,
         }
     }
 
@@ -23,6 +25,7 @@ impl Position {
             self.quote_balance -= cost;
             self.base_balance += config.trade_amount;
             self.has_btc = true;
+            self.last_buy_price = Some(*price); 
             println!(
                 "🟢 BUY @ {:.2} — Bought {:.6} units, Spent {:.2}. New Balance → USD: {:.2}, Asset: {:.6}",
                 price,
@@ -47,6 +50,7 @@ impl Position {
             let revenue = price * config.trade_amount;
             self.quote_balance += revenue;
             self.has_btc = false;
+            self.last_buy_price = None;
             println!(
                 "🔴 SELL @ {:.2} — Sold {:.6} units, Received {:.2}. New Balance → USD: {:.2}, Asset: {:.6}",
                 price,

@@ -12,7 +12,7 @@ pub async fn fetch_klines(client: &Client, symbol: &str) -> Result<Vec<f64>, Box
       .get("https://api.binance.com/api/v3/klines")
       .query(&[
           ("symbol", symbol),
-          ("interval", "1h"),
+          ("interval", "5m"),
           ("limit", "100"),
       ])
       .send()
