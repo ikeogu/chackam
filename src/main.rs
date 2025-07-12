@@ -11,7 +11,7 @@ mod risk;
 mod forex;
 mod utils;
 
-use crate::binance::{fetch_klines, place_market_order, place_margin_market_order};
+use crate::binance::{fetch_klines, place_margin_market_order};
 use crate::strategy::generate_signal;
 use crate::alert::send_alert;
 use tokio::time::{sleep, Duration};
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     let price = *prices.last().unwrap();
                     println!("📥 Executing BUY at {:.2}", price);
-                    position.buy(&price, &settings);
+                    position.buy(&price, &settings).await;
 
                     if settings.live_mode {
                         place_margin_market_order(&client, &settings.trading_pair, "BUY", settings.trade_amount).await?;
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if position.has_btc {
                     let price = *prices.last().unwrap();
                     println!("📤 Executing SELL at {:.2}", price);
-                    position.sell(&price, &settings);
+                    position.sell(&price, &settings).await;
 
                     if settings.live_mode {
                         place_margin_market_order(&client, &settings.trading_pair, "SELL", settings.trade_amount).await?;
@@ -99,11 +99,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     send_alert(&format!("🔴 SELL signal executed at ${:.2}", price)).await;
                 } else {
                     println!("⚠️ No BTC to sell, skipping SELL.");
+                    send_alert(&format!("⚠️ No BTC to sell, skipping SELL.")).await;
                 }
             }
 
             _ => {
                 println!("⏸️ No actionable signal.");
+                
             }
         }
 

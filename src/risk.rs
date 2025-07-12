@@ -14,7 +14,7 @@ pub async fn check_stop_loss_take_profit(
         if price <= loss_trigger {
             if position.base_balance >= config.trade_amount {
                 println!("🛑 Stop loss triggered at ${:.2}", price);
-                position.sell(&price, config);
+                position.sell(&price, config).await;
                 crate::alert::send_alert(&format!("🛑 STOP LOSS triggered at ${:.2}", price)).await;
                 position.last_buy_price = None; // reset
                 return true;
@@ -30,7 +30,7 @@ pub async fn check_stop_loss_take_profit(
         if price >= profit_trigger {
             if position.base_balance >= config.trade_amount {
                 println!("🎯 Take profit triggered at ${:.2}", price);
-                position.sell(&price, config);
+                position.sell(&price, config).await;
                 crate::alert::send_alert(&format!("🎯 TAKE PROFIT triggered at ${:.2}", price)).await;
                 position.last_buy_price = None; // reset
                 return true;

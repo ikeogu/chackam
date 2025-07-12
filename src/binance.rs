@@ -5,7 +5,7 @@ use sha2::Sha256;
 use hex;
 use url::form_urlencoded;
 use serde_json::Value;
-
+use crate::alert::send_alert;
 
 pub async fn fetch_klines(client: &Client, symbol: &str) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
   let res = client
@@ -102,8 +102,9 @@ pub async fn place_margin_market_order(
         .send()
         .await?;
 
-    let body = response.text().await?;
-    println!("📤 Margin Order Response: {}", body);
+        let body = response.text().await?;
+        println!("📤 Margin Order Response: {}", body);
+        send_alert(&format!("📤 Margin Order Response: {}", body)).await;
 
     Ok(())
 }
