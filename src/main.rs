@@ -11,7 +11,7 @@ mod risk;
 mod forex;
 mod utils;
 
-use crate::binance::{fetch_klines, place_market_order};
+use crate::binance::{fetch_klines, place_market_order, place_margin_market_order};
 use crate::strategy::generate_signal;
 use crate::alert::send_alert;
 use tokio::time::{sleep, Duration};
@@ -78,7 +78,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     position.buy(&price, &settings);
 
                     if settings.live_mode {
-                        place_market_order(&client, &settings.trading_pair, "BUY", settings.trade_amount).await?;
+                        place_margin_market_order(&client, &settings.trading_pair, "BUY", settings.trade_amount).await?;
                     }
 
                     send_alert(&format!("🟢 BUY signal executed at ${:.2}", price)).await;
@@ -92,7 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     position.sell(&price, &settings);
 
                     if settings.live_mode {
-                        place_market_order(&client, &settings.trading_pair, "SELL", settings.trade_amount).await?;
+                        place_margin_market_order(&client, &settings.trading_pair, "SELL", settings.trade_amount).await?;
                     }
 
                     send_alert(&format!("🔴 SELL signal executed at ${:.2}", price)).await;

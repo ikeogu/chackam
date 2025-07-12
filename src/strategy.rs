@@ -2,8 +2,8 @@ use ta::indicators::SimpleMovingAverage;
 use ta::Next;
 
 pub fn generate_signal(closes: &[f64]) -> &'static str {
-    let mut sma_short = SimpleMovingAverage::new(10).unwrap();
-    let mut sma_long = SimpleMovingAverage::new(50).unwrap();
+    let mut sma_short = SimpleMovingAverage::new(3).unwrap();
+    let mut sma_long = SimpleMovingAverage::new(10).unwrap();
     let mut signals = vec![];
 
   
@@ -14,11 +14,15 @@ pub fn generate_signal(closes: &[f64]) -> &'static str {
     }
 
     
-    if let Some(&(prev_price, prev_short, prev_long)) = signals.get(signals.len().saturating_sub(2)) {
+    if let Some(&(_prev_price, prev_short, prev_long)) = signals.get(signals.len().saturating_sub(2)) {
         let (last_price, last_short, last_long) = signals.last().unwrap();
 
         println!(
-            "📈 Latest price: {:.2}, SMA_10: {:.2}, SMA_50: {:.2}",
+            "🧪 SMA CHECK → Prev: {:.2}/{:.2}, Last: {:.2}/{:.2}",
+            prev_short, prev_long, last_short, last_long
+        );
+        println!(
+            "📈 Latest price: {:.2}, SMA_5: {:.2}, SMA_20: {:.2}",
             last_price, last_short, last_long
         );
 

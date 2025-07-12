@@ -19,53 +19,59 @@ impl Position {
         }
     }
 
-    pub fn buy(&mut self, price: &f64, config: &Config) {
-        let cost = price * config.trade_amount;
-        if self.quote_balance >= cost {
+    pub fn buy(&mut self, price: &f64, _config: &Config) {
+        let max_affordable_amount = self.quote_balance / price;
+
+        if max_affordable_amount >= 0.000001 {
+            let cost = max_affordable_amount * price;
             self.quote_balance -= cost;
-            self.base_balance += config.trade_amount;
+            self.base_balance += max_affordable_amount;
             self.has_btc = true;
-            self.last_buy_price = Some(*price); 
+            self.last_buy_price = Some(*price);
+
             println!(
-                "🟢 BUY @ {:.2} — Bought {:.6} units, Spent {:.2}. New Balance → USD: {:.2}, Asset: {:.6}",
+                "🟢 BUY @ {:.2} — Bought {:.6} units, Spent {:.2}. New Balance → USDT: {:.2}, BTC: {:.6}",
                 price,
-                config.trade_amount,
+                max_affordable_amount,
                 cost,
                 self.quote_balance,
                 self.base_balance
             );
         } else {
             println!(
-                "❌ Insufficient balance to BUY: Need {:.2}, Available {:.2}",
-                cost,
+                "❌ Insufficient funds: Cannot buy minimum amount with {:.2} USDT",
                 self.quote_balance
             );
-        }
+    }
     }
     
 
-    pub fn sell(&mut self, price: &f64, config: &Config) {
-        if self.base_balance >= config.trade_amount {
-            self.base_balance -= config.trade_amount;
-            let revenue = price * config.trade_amount;
+    pub fn sell(&mut self, price: &f64, _config: &Config) {
+        if self.base_balance >= 0.000001 {
+            let revenue = self.base_balance * price;
+            println!(
+                "🔴 SELL @ {:.2} — Sold {:.6} units, Received {:.2}.",
+                price,
+                self.base_balance,
+                revenue
+            );
             self.quote_balance += revenue;
+            self.base_balance = 0.0;
             self.has_btc = false;
             self.last_buy_price = None;
+    
             println!(
-                "🔴 SELL @ {:.2} — Sold {:.6} units, Received {:.2}. New Balance → USD: {:.2}, Asset: {:.6}",
-                price,
-                config.trade_amount,
-                revenue,
+                "💰 New Balance → USDT: {:.2}, BTC: {:.6}",
                 self.quote_balance,
                 self.base_balance
             );
         } else {
             println!(
-                "❌ Not enough asset to SELL: Trying to sell {:.6}, Available {:.6}",
-                config.trade_amount,
+                "❌ Not enough asset to SELL: Balance = {:.6}",
                 self.base_balance
             );
         }
+    
     }
     
 }

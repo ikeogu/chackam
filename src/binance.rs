@@ -69,3 +69,41 @@ pub async fn place_market_order(
     println!("Order Response: {}", res.text().await?);
     Ok(())
 }
+
+
+pub async fn place_margin_market_order(
+    client: &Client,
+    symbol: &str,
+    side: &str,
+    quantity: f64,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let api_key = env::var("BINANCE_API_KEY")?;
+    let secret = env::var("BINANCE_SECRET_KEY")?;
+    let timestamp = get_timestamp();
+
+    let raw_query = form_urlencoded::Serializer::new(String::new())
+        .append_pair("symbol", symbol)
+        .append_pair("side", side)
+        .append_pair("type", "MARKET")
+        .append_pair("quantity", &quantity.to_string())
+        .append_pair("timestamp", &timestamp.to_string())
+        .finish();
+
+    let signature = sign_query(&secret, &raw_query);
+    
+    let url = format!(
+        "https://api.binance.com/sapi/v1/margin/order?{}&signature={}",
+        raw_query, signature
+    );
+
+    let response = client
+        .post(&url)
+        .header("X-MBX-APIKEY", api_key)
+        .send()
+        .await?;
+
+    let body = response.text().await?;
+    println!("📤 Margin Order Response: {}", body);
+
+    Ok(())
+}
