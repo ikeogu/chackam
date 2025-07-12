@@ -38,6 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     backtest(&prices);
     return Ok(()); */ 
 
+    
 
     loop {
         // Fetch latest prices
