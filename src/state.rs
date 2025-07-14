@@ -53,7 +53,7 @@ impl Position {
     }
     
 
-    pub async fn sell(&mut self, price: &f64, config: &Config) {
+    pub async fn sell(&mut self, price: &f64, _config: &Config) {
         if self.base_balance >= 0.000001 {
             let revenue = self.base_balance * price;
             let message = format!(

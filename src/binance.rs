@@ -39,7 +39,8 @@ fn get_timestamp() -> u64 {
     SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64
 }
 
-pub async fn place_market_order(
+
+/* pub async fn place_market_order(
     client: &Client,
     symbol: &str,
     side: &str,
@@ -69,7 +70,7 @@ pub async fn place_market_order(
     println!("Order Response: {}", res.text().await?);
     Ok(())
 }
-
+ */
 
 pub async fn place_margin_market_order(
     client: &Client,

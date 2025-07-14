@@ -1,0 +1,12 @@
+cargo build --release
+sudo rm -rf /usr/local/bin/rust_trading_bot
+sudo mv target/release/rust_trading_bot /usr/local/bin/rust_trading_bot
+
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable trading-bot
+sudo systemctl start trading-bot
+
+journalctl -u trading-bot -f
+sudo systemctl status trading-bot
+nano /var/log/trading-bot.log
